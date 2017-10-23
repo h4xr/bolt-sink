@@ -96,3 +96,73 @@ class MetricGroup(object):
         """
 
         return self.metric_group
+
+class MessageReport(object):
+    """After a message is processed, we need to generate an overall report
+    which needs to be propagated back to the bolt server. The MessageReport
+    structure provides that functionality to report the final outcome of the
+    dispatched message to the bolt server.
+    """
+
+    #Setup constant codes
+    RESULT_FATAL = -1
+    RESULT_WARNING = 0
+    RESULT_SUCCESS = 1
+
+    def __init__(self):
+        """Initialize the Message Report
+        """
+
+        self.vote = 0
+        self.messages = {}
+
+    def add_message(self, message_id):
+        """Add a new message to the voting list
+
+        Keyword arguments:
+        message_id -- The id of the message to be added
+        """
+
+        if message_id not in self.messages.keys():
+            self.messages[message_id] = 0
+
+    def p_vote(self, message_id):
+        """Give a positive vote to the message
+
+        Keyword arguments:
+        message_id -- The message to be voted upon
+        """
+
+        if message_id not in self.messages.keys():
+            self.add_message(message_id)
+
+        self.messages[message_id] = self.messages[message_id] + 1
+
+    def n_vote(self, message_id):
+        """Give a negative vote to the message
+
+        Keyword arguments:
+        message_id -- The message to be voted upon
+        """
+
+        if message_id not in self.messages.keys():
+            self.add_message(message_id)
+
+        self.messages[message_id] = self.messages[message_id] - 1
+
+    def get_result(self, message_id):
+        """Get the results for the specified message id
+
+        Keyword arguments:
+        message_id -- The id of the message whose results needs to be retrieved
+
+        Returns:
+            Integer
+        """
+
+        if self.messages[message_id] < 0:
+            return self.RESULT_FATAL
+        elif self.messages[message_id] == 0:
+            return self.RESULT_WARNING
+        else:
+            return self.RESULT_SUCCESS
