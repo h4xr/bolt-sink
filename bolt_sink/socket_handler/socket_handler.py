@@ -4,6 +4,7 @@ Description: Socket handling mechanism for Bolt Sink
 Author: Saurabh Badhwar <sbadhwar@redhat.com>
 Date: 23/10/2017
 '''
+import os
 import socket
 import threading
 
