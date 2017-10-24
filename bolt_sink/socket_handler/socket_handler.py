@@ -101,7 +101,9 @@ class SocketHandler(object):
         while True:
             message = client.recv(32000)
             if not message:
+                print "Error"
                 break
+            print message
             self.message_handler(message)   #Handover the message to handler
 
     def __start_publisher(self):

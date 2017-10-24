@@ -19,6 +19,7 @@ class MetricMessage(object):
         """
 
         self.message = message
+        self.__parse_message()
 
     def __parse_message(self):
         """Parse the message to divide it into functional components"""
