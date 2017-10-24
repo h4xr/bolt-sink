@@ -125,3 +125,12 @@ class DataDispatcher(object):
 
         if self.file_desc != None:
             self.file_desc.close()
+
+    def get_backtrace(self):
+        """Get the backtrace of the error log
+
+        Returns:
+            List
+        """
+
+        return self.error_log
