@@ -30,9 +30,9 @@ class GraphiteDispatcher(DataDispatcher):
         metric_data -- The metric data to be written
         """
 
-        write_format = "%s %s %d\n"
+        write_format = "{} {} {}\n"
 
         for name in metric_data.keys():
             for data in metric_data[name]:
-                write_data = write_format.format(name, data[0], data[1])
+                write_data = write_format.format(name, data[1], int(data[0]))
                 self.socket_write(write_data)
