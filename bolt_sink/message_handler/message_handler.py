@@ -4,8 +4,10 @@ Description: The message handler interface
 Author: Saurabh Badhwar <sbadhwar@redhat.com>
 Date: 23/10/2017
 '''
+from bolt_sink.data_dispatcher import GraphiteDispatcher
 from structures import MetricMessage, MetricGroup, MessageReport
 import json
+import os
 
 class MessageHandler(object):
     """Message handler class
@@ -23,6 +25,11 @@ class MessageHandler(object):
         self.socket_handler = socket_handler
         self.metric_group = MetricGroup()
         self.message_report = MessageReport()
+
+        #Initialize the Graphite Dispatcher
+        self.graphite_host = os.getenv('GRAPHITE_HOST', 'localhost')
+        self.graphite_port = os.getenv('GRAPHITE_PORT', 2004)
+        self.graphite_dispatcher = GraphiteDispatcher(self.graphite_host, int(self.graphite_port))
 
         #Register our message handler interface
         self.socket_handler.register_handler(self.handle_message)
@@ -47,8 +54,9 @@ class MessageHandler(object):
 
         if 'error' not in message_dict.keys():
             metric = MetricMessage(message_dict)
-            self.metric_group(metric.get_message_id(), metric.get_message_metrics())
+            self.metric_group.add_metric(metric.get_message_id(), metric.get_message_metrics())
             self.message_report.p_vote(metric.get_message_id())
+            self.graphite_write_data(metric.get_message_metrics())
         else:
             self.handle_erroroneous(message_id)
 
@@ -62,3 +70,12 @@ class MessageHandler(object):
         """
 
         self.message_report.n_vote(message_id)
+
+    def graphite_write_data(self, data):
+        """Write data to the graphite server
+
+        Keyword arguments:
+        data -- The data to be written to the graphite server
+        """
+
+        self.graphite_dispatcher.write_data(data)
