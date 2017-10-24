@@ -4,7 +4,7 @@ Description: The message handler interface
 Author: Saurabh Badhwar <sbadhwar@redhat.com>
 Date: 23/10/2017
 '''
-from structures import MetricMessage, MetricGroup
+from structures import MetricMessage, MetricGroup, MessageReport
 import json
 
 class MessageHandler(object):
@@ -22,6 +22,7 @@ class MessageHandler(object):
 
         self.socket_handler = socket_handler
         self.metric_group = MetricGroup()
+        self.message_report = MessageReport()
 
         #Register our message handler interface
         self.socket_handler.register_handler(self.handle_message)
@@ -44,7 +45,20 @@ class MessageHandler(object):
         if 'message_id' not in message_dict.keys() or 'metrics' not in message_dict.keys():
             return False
 
-        metric = MetricMessage(message_dict)
-        self.metric_group(metric.get_message_id(), metric.get_message_metrics())
+        if 'error' not in message_dict.keys():
+            metric = MetricMessage(message_dict)
+            self.metric_group(metric.get_message_id(), metric.get_message_metrics())
+            self.message_report.p_vote(metric.get_message_id())
+        else:
+            self.handle_erroroneous(message_id)
 
         return True
+
+    def handle_erroroneous(self, message_id):
+        """If the message has some error, handle it accordingly.
+
+        Keyword arguments:
+        message_id -- The id of the message to be handled
+        """
+
+        self.message_report.n_vote(message_id)
