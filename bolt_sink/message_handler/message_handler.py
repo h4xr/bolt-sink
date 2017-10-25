@@ -46,6 +46,7 @@ class MessageHandler(object):
 
         try:
             message_dict = json.loads(message)
+            hostname = message_dict['host']
         except:
             return False
 
@@ -56,7 +57,7 @@ class MessageHandler(object):
             metric = MetricMessage(message_dict)
             self.metric_group.add_metric(metric.get_message_id(), metric.get_message_metrics())
             self.message_report.p_vote(metric.get_message_id())
-            self.graphite_write_data(metric.get_message_metrics())
+            self.graphite_write_data(hostname, metric.get_message_id(), metric.get_message_metrics())
         else:
             self.handle_erroroneous(message_id)
 

@@ -23,10 +23,12 @@ class GraphiteDispatcher(DataDispatcher):
             self.error_log.append("Error establishing a connection to graphite backend")
             return None
 
-    def write_data(self, metric_data):
+    def write_data(self, hostname, message_id, metric_data):
         """Write data to the graphite backend
 
         Keyword arguments:
+        hostname -- The host on which the data was generated
+        message_id -- The id of the message generating the data
         metric_data -- The metric data to be written
         """
 
@@ -34,5 +36,6 @@ class GraphiteDispatcher(DataDispatcher):
 
         for name in metric_data.keys():
             for data in metric_data[name]:
-                write_data = write_format.format(name, data[1], int(data[0]))
+                metric_name = hostname + '_' + message_id + '_' + name
+                write_data = write_format.format(metric_name, data[1], int(data[0]))
                 self.socket_write(write_data)
